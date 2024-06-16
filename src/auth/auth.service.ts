@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
+import { encrypt } from './security/auth.security';
 
 @Injectable()
 export class AuthService {
@@ -24,5 +25,14 @@ export class AuthService {
     return {
       access_token: token,
     };
+  }
+
+  async register(user: any) {
+    try {
+      const newUser = {
+        username: user.username,
+        password: encrypt(user.password),
+      };
+    } catch (error) {}
   }
 }

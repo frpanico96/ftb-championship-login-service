@@ -3,12 +3,15 @@ import { LocalAuthGuard } from './auth/local-auth.guard';
 import { AuthService } from './auth/auth.service';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 
-@Controller()
+@Controller({
+  path: 'auth',
+  version: '1',
+})
 export class AppController {
   constructor(private readonly authService: AuthService) {}
 
   @UseGuards(LocalAuthGuard)
-  @Post('auth/login')
+  @Post('login')
   async login(@Request() req) {
     return this.authService.login(req.user);
   }
