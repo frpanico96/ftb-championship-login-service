@@ -9,6 +9,7 @@ services:
       - MONGO_URI=mongodb://mongo:27017/authservice
     volumes:
       - .:/usr/src/app
+      - /usr/src/app/node_modules
     command: npm run start:dev
   
   mongo:

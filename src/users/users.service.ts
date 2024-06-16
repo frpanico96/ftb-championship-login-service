@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { CustomUser } from './schemas/users.schema';
 import { Model } from 'mongoose';
+import { UserInputDto, mapToDto } from './dtos/users.input.dto';
 
 export type User = any; //Todo: add user interface
 
@@ -52,5 +53,12 @@ export class UsersService {
     //return this.users.find((user) => user.username === username);
   }
 
-  //async createUser()
+  async createUser(userDto: UserInputDto): Promise<UserInputDto | undefined> {
+    try {
+      const user = await new this.userModel(userDto).save();
+      return mapToDto(user);
+    } catch (error) {
+      console.log(error);
+    }
+  }
 }

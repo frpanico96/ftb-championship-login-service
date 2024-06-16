@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { encrypt } from './security/auth.security';
+import { UserInputDto } from 'src/users/dtos/users.input.dto';
+import { UserOutputDto } from 'src/users/dtos/users.output.dto';
 
 @Injectable()
 export class AuthService {
@@ -19,20 +21,33 @@ export class AuthService {
     return null;
   }
 
-  async login(user: any) {
-    const payload = { username: user.username, sub: user.userId };
+  async login(user: UserInputDto) {
+    const payload = { username: user.username /* sub: user.userId */ };
     const token = await this.jwtService.signAsync(payload);
     return {
       access_token: token,
     };
   }
 
-  async register(user: any) {
+  async register(user: UserInputDto) {
     try {
-      const newUser = {
+      /* Add password regex validation */
+      const newUserPayload: UserInputDto = {
+        name: user.name,
         username: user.username,
-        password: encrypt(user.password),
+        password: await encrypt(user.password),
       };
-    } catch (error) {}
+      const newUser: UserInputDto =
+        await this.usersService.createUser(newUserPayload);
+      const tokenPayload = { username: user.username };
+      const token = await this.jwtService.signAsync(tokenPayload);
+      const outputDto: UserOutputDto = {
+        username: newUser.username,
+        token: token,
+      };
+      return outputDto;
+    } catch (error) {
+      console.log(error);
+    }
   }
 }
