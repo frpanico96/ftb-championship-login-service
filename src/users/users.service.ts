@@ -1,10 +1,13 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+/* Service class for User module */
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { CustomUser } from './schemas/users.schema';
 import { Model } from 'mongoose';
 import { UserInputDto, mapToDto } from './dtos/users.input.dto';
-
-export type User = any; //Todo: add user interface
 
 @Injectable()
 export class UsersService {
@@ -12,41 +15,21 @@ export class UsersService {
     @InjectModel(CustomUser.name) private userModel: Model<CustomUser>,
   ) {}
 
-  // Replace with Monoose injection
-  private readonly users = [
-    {
-      userId: 1,
-      username: 'john',
-      password: 'changeme',
-    },
-    {
-      userId: 2,
-      username: 'maria',
-      password: 'guess',
-    },
-  ];
-
   async findOne(username: string): Promise<UserInputDto | undefined> {
+    /* Look for user in the database  */
     try {
       const user: CustomUser = await this.userModel
         .findOne({ username: username })
-        .exec()
-        .catch((error) => {
-          console.log(error);
-          throw new HttpException('Error', HttpStatus.BAD_REQUEST);
-        });
+        .exec();
 
       if (!user) {
-        throw new HttpException(
-          'User not found try registering',
-          HttpStatus.NOT_FOUND,
-        );
+        throw new NotFoundException('User not found try registering');
       }
 
       return mapToDto(user);
     } catch (error) {
       console.log(JSON.stringify(error));
-      throw new HttpException(error.message, HttpStatus.NOT_FOUND);
+      throw new NotFoundException(error.message);
     }
 
     //this.userModel.findOne({ username: username }).exec();
@@ -54,11 +37,13 @@ export class UsersService {
   }
 
   async createUser(userDto: UserInputDto): Promise<UserInputDto | undefined> {
+    /* Create a new user */
     try {
       const user = await new this.userModel(userDto).save();
       return mapToDto(user);
     } catch (error) {
       console.log(error);
+      throw new BadRequestException(error.message);
     }
   }
 }
