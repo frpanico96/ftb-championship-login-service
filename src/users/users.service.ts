@@ -26,9 +26,9 @@ export class UsersService {
     },
   ];
 
-  async findOne(username: string): Promise<User | undefined> {
+  async findOne(username: string): Promise<UserInputDto | undefined> {
     try {
-      const user = await this.userModel
+      const user: CustomUser = await this.userModel
         .findOne({ username: username })
         .exec()
         .catch((error) => {
@@ -43,7 +43,7 @@ export class UsersService {
         );
       }
 
-      return user;
+      return mapToDto(user);
     } catch (error) {
       console.log(JSON.stringify(error));
       throw new HttpException(error.message, HttpStatus.NOT_FOUND);

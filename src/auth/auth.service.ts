@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
-import { encrypt } from './security/auth.security';
+import { encrypt, verifyPass } from './security/auth.security';
 import { UserInputDto } from 'src/users/dtos/users.input.dto';
 import { UserOutputDto } from 'src/users/dtos/users.output.dto';
 
@@ -13,9 +13,15 @@ export class AuthService {
   ) {}
 
   async validateUser(username: string, password: string): Promise<any> {
-    const user = await this.usersService.findOne(username);
-    if (user && user.password === password) {
-      const { password, ...result } = user;
+    console.log('Validating:', username, password);
+    const user: UserInputDto = await this.usersService.findOne(username);
+    console.log(user);
+    const passCheck: boolean = await verifyPass(password, user.password);
+    const result: UserInputDto = new UserInputDto();
+    console.log('Passcheck', passCheck);
+    if (user && passCheck) {
+      result.name = user.name;
+      result.username = user.username;
       return result;
     }
     return null;
@@ -24,9 +30,11 @@ export class AuthService {
   async login(user: UserInputDto) {
     const payload = { username: user.username /* sub: user.userId */ };
     const token = await this.jwtService.signAsync(payload);
-    return {
-      access_token: token,
+    const result: UserOutputDto = {
+      username: user.username,
+      token: token,
     };
+    return result;
   }
 
   async register(user: UserInputDto) {
