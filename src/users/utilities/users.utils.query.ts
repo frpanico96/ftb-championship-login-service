@@ -1,13 +1,32 @@
-import { CustomUser, UserDocument } from '../schemas/users.schema';
+import {
+  UserLoginDto,
+  UserProfileDto,
+  UserRegisterDto,
+} from '../dtos/users.input.dto';
+import { CustomUser } from '../schemas/users.schema';
 
-export const mapUserToDto = <T>(user: UserDocument): T => {
-  const dto = {} as T;
-  const plainUser = user.toObject() as CustomUser;
+export const mapUserToLoginDto = (user: CustomUser): UserLoginDto => {
+  const result: UserLoginDto = new UserLoginDto();
+  result._id = user['_id'];
+  result.username = user.username;
+  result.password = user.password;
+  return result;
+};
 
-  Object.keys(plainUser).forEach((key) => {
-    //console.log(key);
-    (dto as any)[key] = user[key];
-  });
+export const mapUserToProfileDto = (user: CustomUser): UserProfileDto => {
+  const result: UserProfileDto = new UserProfileDto();
+  result._id = user['_id'];
+  result.username = user.username;
+  result.email = user.email;
+  result.createdAt = user['createdAt'];
+  result.updatedAt = user['updatedAt'];
+  result.isEmailVerified = user.isEmailVerified;
+  return result;
+};
 
-  return dto;
+export const mapUserToRegisterDto = (user: CustomUser): UserRegisterDto => {
+  const result: UserRegisterDto = new UserRegisterDto();
+  result._id = user['_id'];
+  result.username = user.username;
+  return result;
 };

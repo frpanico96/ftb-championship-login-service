@@ -1,6 +1,8 @@
 export class UserBaseDto {
   _id?: string;
   username: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export class UserRegisterDto extends UserBaseDto {
