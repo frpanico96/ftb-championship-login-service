@@ -18,16 +18,16 @@ export class AppController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(@Request() req) {
-    const body: UserLoginDto = req.body;
-    body._id = req.user._id;
-    console.log(body);
+    //console.log(req.user);
+    const body: UserLoginDto = req.user;
+    //console.log(body);
     return this.authService.login(body);
   }
 
   @Post('register')
   async register(@Request() req) {
     const body: UserRegisterDto = req.body;
-    console.log(body);
+    //console.log(body);
     return this.authService.register(body);
   }
 
@@ -39,7 +39,7 @@ export class AppController {
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   getProfile(@Request() req) {
-    console.log(req.user);
-    return req.user;
+    //console.log(req.user);
+    return this.userService.getProfile(req.user.id);
   }
 }

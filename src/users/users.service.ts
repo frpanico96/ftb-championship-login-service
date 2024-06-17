@@ -55,5 +55,14 @@ export class UsersService {
     return usersProfile;
   };
 
-  //const getProfile = async(id: string):
+  getProfile = async (id: string): Promise<UserProfileDto | undefined> => {
+    try {
+      const user = await this.userModel.findById(id).exec();
+      const result: UserProfileDto = mapUserToDto<UserProfileDto>(user);
+      return result;
+    } catch (error) {
+      console.error(error.message);
+      throw new NotFoundException(error.message);
+    }
+  };
 }

@@ -26,12 +26,9 @@ export class AuthService {
     const user: UserLoginDto =
       await this.usersService.findOne<UserLoginDto>(username);
     const passCheck: boolean = await verifyPass(password, user.password);
-    const result: UserBaseDto = new UserBaseDto();
 
     if (user && passCheck) {
-      result.username = user.username;
-      result._id = user._id;
-      return result;
+      return user;
     }
     return null;
   }
@@ -76,9 +73,9 @@ export class AuthService {
   }
 
   async singJwt(userPayload: UserBaseDto): Promise<string> {
-    console.log('UserPayload', userPayload);
+    //console.log('UserPayload', userPayload);
     const payload = { username: userPayload.username, sub: userPayload._id };
-    console.log('Signing Payload', payload);
+    //console.log('Signing Payload', payload);
     const token: string = await this.jwtService.signAsync(payload);
     return token;
   }
