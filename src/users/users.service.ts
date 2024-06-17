@@ -7,7 +7,16 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { CustomUser } from './schemas/users.schema';
 import { Model } from 'mongoose';
-import { UserInputDto, mapToDto } from './dtos/users.input.dto';
+import {
+  UserLoginDto,
+  UserProfileDto,
+  UserRegisterDto,
+} from './dtos/users.input.dto';
+import {
+  mapUserToLoginDto,
+  mapUserToProfileDto,
+  mapUserToRegisterDto,
+} from './utilities/users.utils.query';
 
 @Injectable()
 export class UsersService {
@@ -15,35 +24,55 @@ export class UsersService {
     @InjectModel(CustomUser.name) private userModel: Model<CustomUser>,
   ) {}
 
-  async findOne(username: string): Promise<UserInputDto | undefined> {
-    /* Look for user in the database  */
+  findOneLogin = async (
+    username: string,
+  ): Promise<UserLoginDto | undefined> => {
+    /* Look for user in the database */
     try {
-      const user: CustomUser = await this.userModel
-        .findOne({ username: username })
-        .exec();
+      const user = await this.userModel.findOne({ username: username }).exec();
 
       if (!user) {
         throw new NotFoundException('User not found try registering');
       }
 
-      return mapToDto(user);
+      return mapUserToLoginDto(user);
     } catch (error) {
-      console.log(JSON.stringify(error));
+      console.log(error.message);
       throw new NotFoundException(error.message);
     }
+  };
 
-    //this.userModel.findOne({ username: username }).exec();
-    //return this.users.find((user) => user.username === username);
-  }
-
-  async createUser(userDto: UserInputDto): Promise<UserInputDto | undefined> {
+  createUser = async (
+    userDto: UserRegisterDto,
+  ): Promise<UserRegisterDto | undefined> => {
     /* Create a new user */
     try {
       const user = await new this.userModel(userDto).save();
-      return mapToDto(user);
+      return mapUserToRegisterDto(user);
     } catch (error) {
       console.log(error);
       throw new BadRequestException(error.message);
     }
-  }
+  };
+
+  // getAllUsers = async (): Promise<UserProfileDto[]> => {
+  //   const users: UserDocument[] = await this.userModel.find().exec();
+  //   const usersProfile: UserProfileDto[] = [];
+  //   for (const signleUser of users) {
+  //     usersProfile.push(mapUserToDto<UserProfileDto>(signleUser));
+  //   }
+
+  //   return usersProfile;
+  // };
+
+  getProfile = async (id: string): Promise<UserProfileDto | undefined> => {
+    try {
+      const user = await this.userModel.findById(id).exec();
+      const result: UserProfileDto = mapUserToProfileDto(user);
+      return result;
+    } catch (error) {
+      console.error(error.message);
+      throw new NotFoundException(error.message);
+    }
+  };
 }

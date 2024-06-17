@@ -1,16 +1,23 @@
-import { CustomUser } from '../schemas/users.schema';
-
-export class UserInputDto {
-  name: string;
+export class UserBaseDto {
+  _id?: string;
   username: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export class UserRegisterDto extends UserBaseDto {
+  email: string;
+  name: string;
   password: string;
 }
 
-export const mapToDto = (user: CustomUser): UserInputDto => {
-  const userDto: UserInputDto = {
-    name: user.name,
-    username: user.username,
-    password: user.password,
-  };
-  return userDto;
-};
+export class UserLoginDto extends UserBaseDto {
+  password: string;
+}
+
+export class UserProfileDto extends UserBaseDto {
+  email: string;
+  name: string;
+  isEmailVerified: boolean;
+  isChangingEmail: boolean;
+}

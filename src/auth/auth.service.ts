@@ -1,10 +1,18 @@
 /* Sevice Class for auth module */
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { encrypt, verifyPass } from './security/auth.security';
-import { UserInputDto } from 'src/users/dtos/users.input.dto';
 import { UserOutputDto } from 'src/users/dtos/users.output.dto';
+import {
+  UserBaseDto,
+  UserLoginDto,
+  UserRegisterDto,
+} from 'src/users/dtos/users.input.dto';
 
 @Injectable()
 export class AuthService {
@@ -15,25 +23,20 @@ export class AuthService {
 
   async validateUser(username: string, password: string): Promise<any> {
     /* User validation */
-    const user: UserInputDto = await this.usersService.findOne(username);
+    const user: UserLoginDto = await this.usersService.findOneLogin(username);
     const passCheck: boolean = await verifyPass(password, user.password);
-    const result: UserInputDto = new UserInputDto();
 
     if (user && passCheck) {
-      result.name = user.name;
-      result.username = user.username;
-      return result;
+      return user;
     }
     return null;
   }
 
-  async login(user: UserInputDto) {
+  async login(user: UserLoginDto) {
     /* User login and token generation */
     try {
-      const payload = { username: user.username /* sub: user.userId */ };
-      const token = await this.jwtService.signAsync(payload);
+      const token = await this.singJwt(user);
       const result: UserOutputDto = {
-        username: user.username,
         token: token,
       };
 
@@ -43,28 +46,36 @@ export class AuthService {
     }
   }
 
-  async register(user: UserInputDto) {
+  async register(user: UserRegisterDto) {
     /* User registration and token generation */
     try {
       /* Add password regex validation */
-      const newUserPayload: UserInputDto = {
+      const newUserPayload: UserRegisterDto = {
         name: user.name,
         username: user.username,
         password: await encrypt(user.password),
+        email: user.email,
       };
 
-      const newUser: UserInputDto =
+      const newUser: UserRegisterDto =
         await this.usersService.createUser(newUserPayload);
-      const tokenPayload = { username: user.username };
-      const token = await this.jwtService.signAsync(tokenPayload);
+      const token = await this.singJwt(newUser);
       const outputDto: UserOutputDto = {
-        username: newUser.username,
         token: token,
       };
 
       return outputDto;
     } catch (error) {
       console.log(error);
+      throw new InternalServerErrorException(error.message);
     }
+  }
+
+  async singJwt(userPayload: UserBaseDto): Promise<string> {
+    //console.log('UserPayload', userPayload);
+    const payload = { username: userPayload.username, sub: userPayload._id };
+    //console.log('Signing Payload', payload);
+    const token: string = await this.jwtService.signAsync(payload);
+    return token;
   }
 }
