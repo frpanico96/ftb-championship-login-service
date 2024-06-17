@@ -2,33 +2,44 @@ import { Controller, Request, Post, UseGuards, Get } from '@nestjs/common';
 import { LocalAuthGuard } from './auth/guards/local-auth.guard';
 import { AuthService } from './auth/auth.service';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
-import { UserInputDto } from './users/dtos/users.input.dto';
+import { UserLoginDto, UserRegisterDto } from './users/dtos/users.input.dto';
+import { UsersService } from './users/users.service';
 
 @Controller({
   path: 'auth',
   version: '1',
 })
 export class AppController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly userService: UsersService,
+  ) {}
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(@Request() req) {
-    const body: UserInputDto = req.body;
+    const body: UserLoginDto = req.body;
+    body._id = req.user._id;
     console.log(body);
     return this.authService.login(body);
   }
 
   @Post('register')
   async register(@Request() req) {
-    const body: UserInputDto = req.body;
+    const body: UserRegisterDto = req.body;
     console.log(body);
     return this.authService.register(body);
   }
 
+  // @Get('all')
+  // async getAll() {
+  //   return this.userService.getAllUsers();
+  // }
+
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   getProfile(@Request() req) {
+    console.log(req.user);
     return req.user;
   }
 }

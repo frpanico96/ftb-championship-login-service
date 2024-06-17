@@ -8,11 +8,20 @@ export class CustomUser {
   @Prop({ required: true })
   name: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, unique: true })
   username: string;
 
   @Prop({ required: true })
   password: string;
+
+  @Prop({ required: true, unique: true })
+  email: string;
+
+  @Prop({ default: false })
+  isEmailVerified: boolean;
+
+  @Prop({ default: false })
+  isChangingEmail: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(CustomUser);
