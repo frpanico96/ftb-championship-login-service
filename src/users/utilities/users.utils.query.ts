@@ -30,3 +30,6 @@ export const mapUserToRegisterDto = (user: CustomUser): UserRegisterDto => {
   result.username = user.username;
   return result;
 };
+
+/* Write mapToDto with generics */
+// export const mapToDto = <T extends UserBaseDto>() => {};

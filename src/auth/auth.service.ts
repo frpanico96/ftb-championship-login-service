@@ -4,7 +4,7 @@ import {
   InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { encrypt, verifyPass } from './security/auth.security';
 import { UserOutputDto } from 'src/users/dtos/users.output.dto';
@@ -24,6 +24,7 @@ export class AuthService {
   async validateUser(username: string, password: string): Promise<any> {
     /* User validation */
     const user: UserLoginDto = await this.usersService.findOneLogin(username);
+    if (!user) return null;
     const passCheck: boolean = await verifyPass(password, user.password);
 
     if (user && passCheck) {
